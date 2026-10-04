@@ -1,4 +1,4 @@
-package py.edu.uc.lp3.web;
+package py.edu.uc.lp3.rest.controller;
 
 import java.util.Map;
 

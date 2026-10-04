@@ -1,6 +1,10 @@
-package py.edu.uc.lp3.minecraft;
+package py.edu.uc.lp3.domain.minecraft;
 
 public class Aldeano extends NoHostil {
+
+    public Aldeano(String nombre) {
+        this(nombre, 20);
+    }
 
     public Aldeano(String nombre, int vida) {
         super(nombre, vida);

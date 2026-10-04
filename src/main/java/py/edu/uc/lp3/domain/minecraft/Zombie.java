@@ -1,6 +1,10 @@
-package py.edu.uc.lp3.minecraft;
+package py.edu.uc.lp3.domain.minecraft;
 
 public class Zombie extends Hostil {
+
+    public Zombie(String nombre) {
+        this(nombre, 20, 10);
+    }
 
     public Zombie(String nombre, int vida, int rangoAggro) {
         super(nombre, vida, rangoAggro);
