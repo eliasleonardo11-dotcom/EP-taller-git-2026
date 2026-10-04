@@ -17,3 +17,16 @@ Taller de Git, Programación Orientada a Objetos y API REST.
 
 ```bash
 ./mvnw spring-boot:run
+
+## Sobrecarga y sobreescritura
+
+### Sobrecarga
+
+Se agregaron constructores con distintas listas de parámetros.
+
+En `Zombie`:
+
+```java
+Zombie(String nombre)
+Zombie(String nombre, int vida, int rangoAggro)
+
