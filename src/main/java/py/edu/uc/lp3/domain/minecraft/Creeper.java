@@ -22,13 +22,13 @@ public class Creeper extends Hostil {
 
     public int explotarContra(Zombie objetivo, int distancia) {
         if (!estaViva()) {
-            throw new ReglaMinecraftException("El Creeper ya no tiene vida para explotar");
+            throw new CreeperAgotadoException();
         }
         if (distancia < 0) {
             throw new ReglaMinecraftException("La distancia no puede ser negativa");
         }
         if (distancia > getRangoAggro()) {
-            throw new ReglaMinecraftException("El Zombie está fuera del alcance de la explosión");
+            throw new FueraDeAlcanceException(distancia, getRangoAggro());
         }
         if (!objetivo.estaViva()) {
             throw new ReglaMinecraftException("El Zombie debe estar vivo");
