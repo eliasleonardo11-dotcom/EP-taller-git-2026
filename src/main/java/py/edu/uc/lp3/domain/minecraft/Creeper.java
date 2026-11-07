@@ -21,6 +21,13 @@ public class Creeper extends Hostil {
     }
 
     public int explotarContra(Zombie objetivo, int distancia) {
+        validarDetonacion(objetivo, distancia);
+        int danioAplicado = aplicarOndaExplosiva(objetivo, distancia);
+        recibirDanio(getVida());
+        return danioAplicado;
+    }
+
+    private void validarDetonacion(Zombie objetivo, int distancia) {
         if (!estaViva()) {
             throw new CreeperAgotadoException();
         }
@@ -33,11 +40,12 @@ public class Creeper extends Hostil {
         if (!objetivo.estaViva()) {
             throw new ReglaMinecraftException("El Zombie debe estar vivo");
         }
+    }
 
+    private int aplicarOndaExplosiva(Zombie objetivo, int distancia) {
         int potencia = (int) Math.max(1, DANIO_MAXIMO - (long) REDUCCION_POR_BLOQUE * distancia);
         int danioAplicado = Math.min(potencia, objetivo.getVida());
         objetivo.recibirDanio(danioAplicado);
-        recibirDanio(getVida());
         return danioAplicado;
     }
 
