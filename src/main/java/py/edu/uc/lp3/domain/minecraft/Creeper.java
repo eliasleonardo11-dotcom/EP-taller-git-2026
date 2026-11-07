@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 @Entity
 @DiscriminatorValue("CREEPER")
 public class Creeper extends Hostil {
+    private static final int DANIO_MAXIMO = 12;
+    private static final int REDUCCION_POR_BLOQUE = 3;
 
     protected Creeper() {
     }
@@ -16,6 +18,27 @@ public class Creeper extends Hostil {
 
     public Creeper(String nombre, int vida, int rangoAggro) {
         super(nombre, vida, rangoAggro);
+    }
+
+    public int explotarContra(Zombie objetivo, int distancia) {
+        if (!estaViva()) {
+            throw new ReglaMinecraftException("El Creeper ya no tiene vida para explotar");
+        }
+        if (distancia < 0) {
+            throw new ReglaMinecraftException("La distancia no puede ser negativa");
+        }
+        if (distancia > getRangoAggro()) {
+            throw new ReglaMinecraftException("El Zombie está fuera del alcance de la explosión");
+        }
+        if (!objetivo.estaViva()) {
+            throw new ReglaMinecraftException("El Zombie debe estar vivo");
+        }
+
+        int potencia = (int) Math.max(1, DANIO_MAXIMO - (long) REDUCCION_POR_BLOQUE * distancia);
+        int danioAplicado = Math.min(potencia, objetivo.getVida());
+        objetivo.recibirDanio(danioAplicado);
+        recibirDanio(getVida());
+        return danioAplicado;
     }
 
     @Override

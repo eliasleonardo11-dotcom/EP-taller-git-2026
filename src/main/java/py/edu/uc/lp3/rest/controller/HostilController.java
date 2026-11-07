@@ -73,6 +73,23 @@ public class HostilController {
         return Map.of("comportamiento", hostil.comportamiento());
     }
 
+    @PostMapping("/{id}/explosiones")
+    @Transactional
+    public ResultadoExplosion explotar(@PathVariable long id, @RequestBody PedidoExplosion pedido) {
+        if (pedido.zombieId() == null || pedido.distancia() == null) {
+            throw new ReglaMinecraftException("Indicá zombieId y distancia");
+        }
+        if (!(buscar(id) instanceof Creeper creeper)) {
+            throw new ReglaMinecraftException("El hostil de la URL debe ser un Creeper");
+        }
+        if (!(buscar(pedido.zombieId()) instanceof Zombie zombie)) {
+            throw new ReglaMinecraftException("El objetivo debe ser un Zombie");
+        }
+
+        int danio = creeper.explotarContra(zombie, pedido.distancia());
+        return new ResultadoExplosion(danio, EstadoHostil.de(creeper), EstadoHostil.de(zombie));
+    }
+
     private Hostil buscar(long id) {
         return hostiles.findById(id).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "No existe el hostil " + id));
@@ -95,6 +112,12 @@ public class HostilController {
     }
 
     public record CambioHostil(String nombre, Integer rangoAggro) {
+    }
+
+    public record PedidoExplosion(Long zombieId, Integer distancia) {
+    }
+
+    public record ResultadoExplosion(int danio, EstadoHostil creeper, EstadoHostil zombie) {
     }
 
     public record EstadoHostil(long id, TipoHostil tipo, String nombre, int vida, int rangoAggro,
