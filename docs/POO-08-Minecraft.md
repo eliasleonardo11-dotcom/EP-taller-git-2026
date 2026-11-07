@@ -1,9 +1,7 @@
 # POO-08 · Especificaciones de Minecraft
 
-**Alumno** Elías Pont  
-**Asignatura** Lenguaje de Programación 3
-
-[Commit de la solución](https://github.com/eliasleonardo11-dotcom/EP-taller-git-2026/commit/ad8d65d13bdc430a3f65c22a3e3cff49d5d37801)
+- **Alumno** Elías Pont
+- **Asignatura** Lenguaje de Programación 3
 
 ## Objetivo
 
@@ -46,8 +44,8 @@ El JSON de error contiene `codigo` y `mensaje`.
 ## Cómo probarlo
 
 1. Arrancá con `./mvnw spring-boot:run`, o con `.\mvnw.cmd spring-boot:run` en PowerShell.
-2. En Insomnia, importá `insomnia/POO-08-Minecraft.json` con **Import → File**. Ejecutá los pedidos 01–03 y cargá los IDs de las dos altas en `creeper_id` y `zombie_id` del entorno.
+2. En Insomnia, importá `insomnia/POO-08-Minecraft.json` con **Import → File**. Ejecutá los pedidos 01–03. Las altas guardan sus IDs en `creeper_id` y `zombie_id` del entorno. Si tu instalación no ejecuta los scripts de respuesta, copiá ambos IDs manualmente.
 3. Ejecutá 04–11 para verificar lecturas, actualización, POST ilegal, 404 y comportamiento. Los listados 04 y 09 deben contener los mismos IDs.
 4. Ejecutá 12–15. A 4 bloques, esperá 422. A 1 bloque, esperá 9 puntos de daño. Confirmá con el listado que el Creeper quedó con 0 y el Zombie con 11. El siguiente intento devuelve 409.
 5. Antes de borrar, podés reiniciar el servicio y repetir el listado para verificar que las dos vidas se conservan en el archivo de H2. También podés consultar `SELECT * FROM hostiles;` en `http://localhost:8080/h2-console`, con `jdbc:h2:file:./data/minecraft`, usuario `sa` y contraseña vacía.
-6. Ejecutá 16–18 para verificar el borrado y retirar los datos de ejemplo.
+6. Ejecutá 16–18 para verificar el borrado y retirar los datos de ejemplo. El pedido 19 prueba el rechazo de un subtipo desconocido.

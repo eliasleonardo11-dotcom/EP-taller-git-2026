@@ -4,8 +4,6 @@ Elías Pont · Lenguaje de Programación 3 · Minecraft
 
 API REST para guardar hostiles y simular una explosión entre un Creeper y un Zombie. El proyecto usa Java 21, Spring Boot, Spring Data JPA y H2. La licencia del proyecto es [Apache 2.0](LICENSE).
 
-[Commit de la solución](https://github.com/eliasleonardo11-dotcom/EP-taller-git-2026/commit/ad8d65d13bdc430a3f65c22a3e3cff49d5d37801)
-
 ## Arranque
 
 Desde la raíz del repositorio, con JDK 21 disponible:
@@ -14,7 +12,7 @@ Desde la raíz del repositorio, con JDK 21 disponible:
 ./mvnw spring-boot:run
 ```
 
-En PowerShell, ejecutá `.\mvnw.cmd spring-boot:run`. Abrí [el inicio de la API](http://localhost:8080/) para comprobar el arranque. Para ejecutar las pruebas de Maven, usá `./mvnw test`.
+En PowerShell, ejecutá `.\mvnw.cmd spring-boot:run`. Abrí [el inicio de la API](http://localhost:8080/) para comprobar el arranque. Para ejecutar las pruebas, usá `./mvnw test` (o `.\mvnw.cmd test` en PowerShell). Usan una base H2 en memoria para verificar el CRUD, las excepciones, las restricciones SQL y los casos límite de la explosión.
 
 ### Configuración y consola de H2
 
@@ -47,7 +45,7 @@ La simulación aplica ambas reglas en una transacción sobre la familia `Hostil`
 ```mermaid
 classDiagram
     class Entidad {
-        <<mapped superclass>>
+        <<MappedSuperclass>>
         -String nombre
         -int vida
         +recibirDanio(int cantidad)
@@ -63,6 +61,8 @@ classDiagram
     }
     class Creeper {
         +explotarContra(Zombie objetivo, int distancia) int
+        -validarDetonacion(Zombie objetivo, int distancia)
+        -aplicarOndaExplosiva(Zombie objetivo, int distancia) int
     }
     class Zombie
     class NoHostil
@@ -110,15 +110,15 @@ classDiagram
 | Tema | Decisión del proyecto |
 | --- | --- |
 | Recurso y verbo | `/api/hostiles` representa la colección y `/api/hostiles/{id}` cada hostil. El verbo indica si se crea, se consulta, se actualiza o se elimina. |
-| Identidad | H2 asigna el `id` numérico al insertar. El cliente lo obtiene en el cuerpo y en `Location` después de un `POST`. |
+| Identidad | H2 asigna el `id` numérico al insertar. El JSON de alta lo omite y el cliente lo obtiene en el cuerpo y en `Location` después de un `POST`. |
 | Herencia y tablas | Usé `SINGLE_TABLE` porque `Creeper` y `Zombie` comparten todos sus datos persistidos. Una tabla permite listar ambos sin uniones. El discriminador `tipo` identifica cada fila y Jackson convierte el campo JSON `tipo` en un enum para seleccionar el constructor de dominio. |
 | Interfaz y repositorio | `HostilController` usa el contrato de `HostilRepository` para pedir búsquedas y guardados. `Descriptible` aplica la misma idea al comportamiento del juego. |
-| Protocolo del dominio | `GET /api/hostiles/{id}/comportamiento` usa la referencia `Descriptible`. El mensaje `comportamiento()` también se puede enviar a un `Aldeano` mediante ese tipo. |
+| Protocolo del dominio | `GET /api/hostiles/{id}/comportamiento` usa la referencia `Descriptible`. Elegí el nombre `Descriptible` porque `comportamiento()` describe lo que hace cada criatura y se puede enviar también a un `Aldeano` mediante el mismo tipo. |
 | Ocultamiento | Constructores y métodos del dominio validan nombre, vida, rango y daño. JPA carga los campos privados mediante constructores protegidos sin argumentos. H2 también exige valores obligatorios y verifica que la vida y el rango sean no negativos. Compará los listados 04 y 09 de Insomnia para comprobar que el alta ilegal deja las filas intactas. |
 | PUT y PATCH | Elegí `PATCH` para actualizar `nombre`, `rangoAggro` o ambos. Un campo omitido o `null` conserva el valor anterior. Al menos uno debe tener valor. La vida se fija en el alta y la cambia el dominio durante la partida. |
-| DELETE | Elimina la fila de la partida y responde 204. La detonación llama al dominio para cambiar la vida y permite seguir leyendo al Creeper con vida cero hasta borrarlo. |
+| DELETE | El controlador le pide al repositorio que elimine la fila de la partida y responde 204. En el juego, la detonación deja al Creeper con vida cero y se puede seguir consultando hasta borrarlo. |
 | Dos reglas | `POST /api/hostiles/{id}/explosiones` representa la detonación de un Creeper contra un Zombie. Un `GET` posterior de los hostiles muestra las dos vidas guardadas. |
-| Excepciones | `ReglaMinecraftException` cubre invariantes generales. `FueraDeAlcanceException` identifica la distancia excesiva y `CreeperAgotadoException` identifica la falta de vida del Creeper. Cada tipo tiene su `@ExceptionHandler`. Son no comprobadas para dejar que interrumpan la operación y provoquen el rollback de Spring. Un ID inexistente es un error de búsqueda 404. El cuerpo incluye `codigo` y `mensaje`. |
+| Excepciones | `ReglaMinecraftException` cubre invariantes generales. `FueraDeAlcanceException` identifica la distancia excesiva y `CreeperAgotadoException` identifica la falta de vida del Creeper. Cada tipo tiene su `@ExceptionHandler`. Una excepción comprobada obliga al llamador a capturarla o declararla. Elegí excepciones no comprobadas para que se propaguen hasta el handler HTTP y Spring revierta la transacción si la regla falla. Un ID inexistente es un error de búsqueda 404. El cuerpo incluye `codigo` y `mensaje`. |
 
 Si se cambia H2 por otra base relacional, los primeros ajustes van en el driver de `pom.xml` y en las propiedades de conexión y esquema. El repositorio conserva su contrato y el método de explosión conserva las reglas del juego.
 
@@ -126,10 +126,10 @@ Si se cambia H2 por otra base relacional, los primeros ajustes van en el driver 
 
 Importá [la colección POO-08 · Minecraft](insomnia/POO-08-Minecraft.json) desde **Import → File**. En el entorno base, `base_url` apunta a `http://localhost:8080`. [Referencia de importación de Insomnia](https://developer.konghq.com/insomnia/import-export/).
 
-1. Ejecutá 01–03. Copiá el `id` de cada alta en `creeper_id` y `zombie_id`, respectivamente. Usá los IDs nuevos cada vez que repitas el recorrido.
+1. Ejecutá 01–03. Las altas guardan sus IDs en `creeper_id` y `zombie_id` automáticamente. Si tu instalación no ejecuta los scripts de respuesta, copiá cada ID al entorno base antes de continuar.
 2. Ejecutá 04–07 para listar, consultar y renombrar al Zombie. Verificá que la segunda lectura conserve el nombre nuevo.
 3. Ejecutá 08–11. Compará los IDs de 04 y 09, comprobá el 404 del ID 0 y leé el comportamiento del Zombie.
 4. Ejecutá 12–15 en ese orden. Primero esperá 422 con `FUERA_DE_ALCANCE`. La explosión a distancia 1 causa 9 puntos de daño y deja las vidas en 0 y 11. Confirmalas con el listado 14 y, si querés ver las filas, con la consola H2. El segundo intento válido en distancia devuelve 409 con `CREEPER_AGOTADO`.
-5. Ejecutá 16–18 para borrar los datos de ejemplo y confirmar con 404 que el Zombie ya no existe.
+5. Ejecutá 16–18 para borrar los datos de ejemplo y confirmar con 404 que el Zombie ya no existe. El pedido 19 envía un subtipo desconocido y devuelve 400 con `PEDIDO_INVALIDO`.
 
 Las [especificaciones para la entrega](docs/POO-08-Minecraft.md) enumeran los cuerpos y códigos HTTP. La [bitácora](BITACORA.md) registra el uso de IA.
