@@ -3,6 +3,8 @@
 - **Alumno** Elías Pont
 - **Asignatura** Lenguaje de Programación 3
 
+[Commit de la solución](https://github.com/eliasleonardo11-dotcom/EP-taller-git-2026/commit/e92a7f191515099f80999990419265f7ab5280a7)
+
 ## Objetivo
 
 Gestionar los hostiles de una partida de Minecraft mediante una API HTTP y guardar su estado en H2. La familia persistida tiene una clase base `Hostil` y dos subtipos, `Creeper` y `Zombie`. La simulación cambia la vida de ambos como una sola operación.
