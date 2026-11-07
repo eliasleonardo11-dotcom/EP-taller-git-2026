@@ -39,3 +39,4 @@ Se utilizó ChatGPT con el modelo GPT-5.6 Sol para revisar la entrega original, 
 - **Resumen del prompt** Continuar el repositorio del taller y aplicar POO-08 al modelado existente. La consigna pidió un CRUD de la familia, H2, dos reglas para una simulación persistida, excepciones del dominio, una interfaz, una colección de Insomnia y la documentación para entregar.
 - **Asistencia** Codex revisó la consigna y la rúbrica, implementó y verificó el servicio sobre el modelo de Minecraft, y preparó la colección y la documentación.
 - **Seguimiento** Se pidió comprobar todos los requisitos de la consigna y la rúbrica. Codex revisó el arranque desde Git Bash, agregó pruebas reproducibles con H2 y ajustó el recorrido de Insomnia.
+- **Seguimiento de pruebas** Se pidió revisar la sección de verificación de las especificaciones. Codex reprodujo el conflicto concurrente contra H2 y documentó cómo repetir la prueba.

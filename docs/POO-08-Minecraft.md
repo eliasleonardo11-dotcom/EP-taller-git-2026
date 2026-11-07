@@ -3,8 +3,6 @@
 - **Alumno** Elías Pont
 - **Asignatura** Lenguaje de Programación 3
 
-[Commit de la solución](https://github.com/eliasleonardo11-dotcom/EP-taller-git-2026/commit/e92a7f191515099f80999990419265f7ab5280a7)
-
 ## Objetivo
 
 Gestionar los hostiles de una partida de Minecraft mediante una API HTTP y guardar su estado en H2. La familia persistida tiene una clase base `Hostil` y dos subtipos, `Creeper` y `Zombie`. La simulación cambia la vida de ambos como una sola operación.
@@ -28,7 +26,7 @@ La aplicación se ejecuta en `http://localhost:8080`.
 
 - El nombre tiene entre 1 y 100 caracteres y contiene algún carácter distinto de espacio en blanco. La vida y el rango son enteros no negativos. `PATCH` modifica solo la configuración y requiere al menos un campo con valor.
 - El Creeper y el Zombie deben tener vida. El alcance de la explosión es el rango del Creeper. La distancia es un entero no negativo y el límite del alcance se incluye.
-- La potencia dentro del alcance es `max(1, 12 - 3 × distancia)`. El daño aplicado se limita a la vida restante del Zombie y el Creeper queda con vida cero. Si falla la operación, las dos filas conservan sus estados previos.
+- La potencia dentro del alcance es `max(1, 12 - 3 × distancia)`. El daño aplicado se limita a la vida restante del Zombie y el Creeper queda con vida cero. Si falla la operación, H2 revierte todos los cambios de la explosión.
 
 ## Respuestas de error
 
@@ -41,7 +39,7 @@ El JSON de error contiene `codigo` y `mensaje`.
 | 404 | `HOSTIL_NO_ENCONTRADO` | Consultar el ID 0. |
 | 422 | `FUERA_DE_ALCANCE` | Intentar detonar a 4 bloques con un Creeper de rango 3. |
 | 409 | `CREEPER_AGOTADO` | Intentar otra detonación con el Creeper después de una explosión exitosa. |
-| 409 | `CAMBIO_CONCURRENTE` | Modificar una fila que otra operación ya cambió durante la misma ventana de escritura. |
+| 409 | `CAMBIO_CONCURRENTE` | Ejecutar la prueba de concurrencia indicada debajo. |
 
 ## Cómo probarlo
 
@@ -51,3 +49,13 @@ El JSON de error contiene `codigo` y `mensaje`.
 4. Ejecutá 12–15. A 4 bloques, esperá 422. A 1 bloque, esperá 9 puntos de daño. Confirmá con el listado que el Creeper quedó con 0 y el Zombie con 11. El siguiente intento devuelve 409.
 5. Antes de borrar, podés reiniciar el servicio y repetir el listado para verificar que las dos vidas se conservan en el archivo de H2. También podés consultar `SELECT * FROM hostiles;` en `http://localhost:8080/h2-console`, con `jdbc:h2:file:./data/minecraft`, usuario `sa` y contraseña vacía.
 6. Ejecutá 16–18 para verificar el borrado y retirar los datos de ejemplo. El pedido 19 prueba el rechazo de un subtipo desconocido.
+
+### Conflicto concurrente
+
+Desde la raíz del proyecto, ejecutá la prueba que coordina dos transacciones de H2:
+
+```bash
+./mvnw "-Dtest=EpTallerGit2026ApplicationTests#revierteTodaLaExplosionAnteUnCambioConcurrente" test
+```
+
+En PowerShell, usá `.\mvnw.cmd` en lugar de `./mvnw`. La prueba cambia el nombre del Zombie mientras la explosión intenta guardar su estado. Verifica que la API devuelva HTTP 409 con `CAMBIO_CONCURRENTE`, que ambos hostiles sigan con 20 de vida y que el cambio de nombre confirmado se conserve.

@@ -1,6 +1,8 @@
 package py.edu.uc.lp3;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:h2:mem:poo08",
+        "spring.datasource.url=jdbc:h2:mem:poo08;LOCK_TIMEOUT=15000",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @AutoConfigureMockMvc
@@ -151,6 +153,52 @@ class EpTallerGit2026ApplicationTests {
         assertThat(objetivo.getVida()).isEqualTo(1);
         assertThat(new Creeper("Chispa", 1, 0).explotarContra(objetivo, 0)).isEqualTo(1);
         assertThat(objetivo.getVida()).isZero();
+    }
+
+    @Test
+    void revierteTodaLaExplosionAnteUnCambioConcurrente() throws Exception {
+        long creeper = crear("CREEPER", "Chispa", 3);
+        long zombie = crear("ZOMBIE", "Caminante", 10);
+
+        try (var executor = Executors.newSingleThreadExecutor();
+             var conexion = jdbc.getDataSource().getConnection()) {
+            conexion.setAutoCommit(false);
+            try (var consulta = conexion.prepareStatement(
+                    "UPDATE hostiles SET nombre = ?, version = version + 1 WHERE id = ?")) {
+                consulta.setString(1, "Nombre concurrente");
+                consulta.setLong(2, zombie);
+                assertThat(consulta.executeUpdate()).isEqualTo(1);
+            }
+
+            // La explosión lee la versión anterior y espera al escribir la fila bloqueada.
+            var respuesta = executor.submit(() -> explotar(creeper, zombie, 1));
+            esperarEscrituraBloqueada();
+            conexion.commit();
+
+            respuesta.get(10, TimeUnit.SECONDS)
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.codigo").value("CAMBIO_CONCURRENTE"));
+        }
+
+        assertThat(vidaEnH2(creeper)).isEqualTo(20);
+        assertThat(vidaEnH2(zombie)).isEqualTo(20);
+        mvc.perform(get(HOSTILES + "/{id}", zombie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("Nombre concurrente"));
+    }
+
+    private void esperarEscrituraBloqueada() throws InterruptedException {
+        long limite = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        do {
+            int bloqueadas = jdbc.queryForObject("""
+                    SELECT COUNT(*) FROM INFORMATION_SCHEMA.SESSIONS WHERE BLOCKER_ID IS NOT NULL
+                    """, Integer.class);
+            if (bloqueadas > 0) {
+                return;
+            }
+            Thread.sleep(25);
+        } while (System.nanoTime() < limite);
+        throw new AssertionError("La explosión no llegó a esperar por la fila bloqueada");
     }
 
     private long crear(String tipo, String nombre, int rango) throws Exception {
