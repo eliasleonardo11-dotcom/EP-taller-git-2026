@@ -1,6 +1,18 @@
 package py.edu.uc.lp3.domain.minecraft;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("CREEPER")
 public class Creeper extends Hostil {
+
+    protected Creeper() {
+    }
+
+    public Creeper(String nombre) {
+        this(nombre, 20, 3);
+    }
 
     public Creeper(String nombre, int vida, int rangoAggro) {
         super(nombre, vida, rangoAggro);

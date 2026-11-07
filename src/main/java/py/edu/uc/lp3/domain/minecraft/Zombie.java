@@ -1,6 +1,14 @@
 package py.edu.uc.lp3.domain.minecraft;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("ZOMBIE")
 public class Zombie extends Hostil {
+
+    protected Zombie() {
+    }
 
     public Zombie(String nombre) {
         this(nombre, 20, 10);

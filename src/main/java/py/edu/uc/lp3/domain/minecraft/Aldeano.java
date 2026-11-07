@@ -1,6 +1,6 @@
 package py.edu.uc.lp3.domain.minecraft;
 
-public class Aldeano extends NoHostil {
+public class Aldeano extends NoHostil implements Descriptible {
 
     public Aldeano(String nombre) {
         this(nombre, 20);
