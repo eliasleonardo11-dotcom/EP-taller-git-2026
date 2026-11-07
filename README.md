@@ -1,265 +1,133 @@
-# EP-taller-git-2026
+# EP-taller-git-2026 · POO-08
 
-Taller de Git, Programación Orientada a Objetos y API REST.
+Elías Pont · Lenguaje de Programación 3 · Minecraft
 
-**Alumno:** Elías Pont  
-**Materia:** Lenguaje de Programación 3  
-**Dominio:** Minecraft  
-**Repositorio:** https://github.com/eliasleonardo11-dotcom/EP-taller-git-2026
+API REST para guardar hostiles y simular una explosión entre un Creeper y un Zombie. El proyecto usa Java 21, Spring Boot, Spring Data JPA y H2. La licencia del proyecto es [Apache 2.0](LICENSE).
 
-## Tecnologías
+## Arranque
 
-- Java 21
-- Spring Boot
-- Maven
-- Spring Web
-
-## Licencia
-
-Este proyecto utiliza la **Apache License 2.0**. El texto completo se encuentra en el archivo `LICENSE`.
-
-## Organización del proyecto
-
-```text
-src/main/java/py/edu/uc/lp3/
-├── EpTallerGit2026Application.java
-├── domain/
-│   └── minecraft/
-│       ├── Entidad.java
-│       ├── Hostil.java
-│       ├── NoHostil.java
-│       ├── Jugador.java
-│       ├── Zombie.java
-│       ├── Creeper.java
-│       └── Aldeano.java
-└── rest/
-    └── controller/
-        ├── IndexController.java
-        └── EntidadController.java
-```
-
-## Ejecución
-
-Desde la raíz del repositorio:
+Desde la raíz del repositorio, con JDK 21 disponible:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-La aplicación queda disponible en:
+En PowerShell, ejecutá `.\mvnw.cmd spring-boot:run`. Abrí [el inicio de la API](http://localhost:8080/) para comprobar el arranque. Para ejecutar las pruebas de Maven, usá `./mvnw test`.
 
-```text
-http://localhost:8080
+### Configuración y consola de H2
+
+| Propiedad | Valor | Efecto |
+| --- | --- | --- |
+| `spring.datasource.url` | `jdbc:h2:file:./data/minecraft` | Guarda las filas en `data/minecraft.mv.db`, relativo al directorio de arranque. Conserva los datos al reiniciar. |
+| `spring.datasource.username` | `sa` | Usuario local de H2. |
+| `spring.datasource.password` | Vacío | La conexión de desarrollo usa una contraseña vacía. |
+| `spring.jpa.hibernate.ddl-auto` | `update` | Hibernate crea o actualiza el esquema al arrancar y conserva las filas existentes. |
+| `spring.jpa.open-in-view` | `false` | La persistencia se completa en la operación transaccional y las respuestas se construyen como datos de transporte. |
+| `spring.profiles.default` | `dev` | Activa el perfil de desarrollo cuando no se selecciona otro. |
+| `spring.h2.console.enabled` | `true` en `dev` | Habilita la consola web en desarrollo. |
+| `spring.h2.console.path` | `/h2-console` en `dev` | Fija la ruta de acceso a la consola. |
+
+En [la consola H2](http://localhost:8080/h2-console), ingresá la URL JDBC de la tabla anterior, el usuario `sa` y la contraseña vacía. Después de simular y antes de borrar, ejecutá:
+
+```sql
+SELECT id, tipo, nombre, vida, rango_aggro FROM hostiles ORDER BY id;
 ```
 
-## Modelo de clases
+## Reglas de la explosión
+
+1. Un `Creeper` vivo puede detonar contra un `Zombie` vivo si la distancia en bloques está entre cero y su `rangoAggro`, inclusive, y queda con cero de vida al detonar.
+2. El `Zombie` recibe hasta 12 puntos de daño, con una reducción de 3 por bloque y una potencia mínima de 1 dentro del alcance, limitada por su vida restante.
+
+La simulación aplica ambas reglas en una transacción sobre la familia `Hostil`. El resultado que queda en H2 es la nueva vida de los dos hostiles. El control de versión de JPA permite detectar modificaciones simultáneas y revertir la operación si hay un conflicto.
+
+## Modelo y responsabilidades
 
 ```mermaid
 classDiagram
     class Entidad {
-        <<abstract>>
+        <<mapped superclass>>
         -String nombre
         -int vida
-        +Entidad(String nombre, int vida)
-        +String getNombre()
-        +int getVida()
-        +boolean estaViva()
-        +void recibirDanio(int cantidad)
-        +String desaparecer()
-        +String moverse()*
-        +String comportamiento()*
+        +recibirDanio(int cantidad)
+        +moverse()*
+        +comportamiento()*
     }
-
     class Hostil {
         <<abstract>>
+        -Long id
         -int rangoAggro
-        +Hostil(String nombre, int vida, int rangoAggro)
-        +int getRangoAggro()
-        +String atacar()*
+        +configurar(String nombre, int rangoAggro)
+        +atacar()*
     }
-
-    class NoHostil {
-        <<abstract>>
-        +NoHostil(String nombre, int vida)
-        +String interactuar()*
-    }
-
-    class Zombie {
-        +Zombie(String nombre)
-        +Zombie(String nombre, int vida, int rangoAggro)
-        +String moverse()
-        +String atacar()
-        +String comportamiento()
-    }
-
     class Creeper {
-        +Creeper(String nombre, int vida, int rangoAggro)
-        +String moverse()
-        +String atacar()
-        +String comportamiento()
+        +explotarContra(Zombie objetivo, int distancia) int
     }
-
-    class Aldeano {
-        +Aldeano(String nombre)
-        +Aldeano(String nombre, int vida)
-        +String moverse()
-        +String interactuar()
-        +String comportamiento()
+    class Zombie
+    class NoHostil
+    class Aldeano
+    class Descriptible {
+        <<interface>>
+        +comportamiento() String
     }
-
-    class Jugador {
-        -int experiencia
-        +Jugador(String nombre, int vida, int experiencia)
-        +int getExperiencia()
-        +String moverse()
-        +String comportamiento()
+    class HostilRepository {
+        <<interface>>
+        +findAllByOrderByIdAsc()
     }
+    class HostilController
+    class ErroresMinecraft
+    class ReglaMinecraftException
+    class FueraDeAlcanceException
+    class CreeperAgotadoException
 
     Entidad <|-- Hostil
     Entidad <|-- NoHostil
-    Entidad <|-- Jugador
-    Hostil <|-- Zombie
-    Hostil <|-- Creeper
     NoHostil <|-- Aldeano
+    Hostil <|-- Creeper
+    Hostil <|-- Zombie
+    Descriptible <|.. Hostil
+    Descriptible <|.. Aldeano
+    Creeper ..> Zombie : aplica daño
+    HostilController ..> HostilRepository : consulta y persiste
+    HostilController ..> Descriptible : lee comportamiento
+    HostilRepository ..> Hostil : gestiona
+    ReglaMinecraftException <|-- FueraDeAlcanceException
+    ReglaMinecraftException <|-- CreeperAgotadoException
+    Creeper ..> FueraDeAlcanceException : lanza
+    Creeper ..> CreeperAgotadoException : lanza
+    ErroresMinecraft ..> ReglaMinecraftException : traduce a HTTP
 ```
 
-## Sobrecarga y sobreescritura
+`Hostil` hereda los datos comunes de `Entidad`. El protocolo `Descriptible` conecta a la familia hostil con `Aldeano`, de la familia `NoHostil`. `HostilController` depende de la interfaz del repositorio, cuya implementación genera Spring Data. El dominio conserva las reglas y `ErroresMinecraft` traduce cada tipo de excepción a HTTP.
 
-### Sobrecarga
+**Sobrecarga.** `Zombie(String)` y `Creeper(String)` delegan en el constructor de tres argumentos mediante `this(...)`. Los valores por defecto son 20 de vida para ambos y un rango de 10 para el Zombie y de 3 para el Creeper. `Aldeano` mantiene sus dos constructores. Los constructores completos delegan al padre con `super(...)`.
 
-La **sobrecarga** ocurre cuando existen varios constructores o métodos con el mismo nombre, pero con distinta lista de parámetros. La elección de cuál utilizar se realiza en tiempo de compilación según los argumentos enviados.
+**Sobreescritura.** `Creeper` y `Zombie` conservan `@Override` en `moverse()`, `atacar()` y `comportamiento()`. La firma se conserva y la ejecución elige el método de la clase concreta. En la sobrecarga, los argumentos determinan la firma.
 
-En este proyecto se utiliza sobrecarga de constructores.
+## Qué hay que pensar
 
-### Zombie
+| Tema | Decisión del proyecto |
+| --- | --- |
+| Recurso y verbo | `/api/hostiles` representa la colección y `/api/hostiles/{id}` cada hostil. El verbo indica si se crea, se consulta, se actualiza o se elimina. |
+| Identidad | H2 asigna el `id` numérico al insertar. El cliente lo obtiene en el cuerpo y en `Location` después de un `POST`. |
+| Herencia y tablas | Usé `SINGLE_TABLE` porque `Creeper` y `Zombie` comparten todos sus datos persistidos. Una tabla permite listar ambos sin uniones. El discriminador `tipo` identifica cada fila y Jackson convierte el campo JSON `tipo` en un enum para seleccionar el constructor de dominio. |
+| Interfaz y repositorio | `HostilController` usa el contrato de `HostilRepository` para pedir búsquedas y guardados. `Descriptible` aplica la misma idea al comportamiento del juego. |
+| Protocolo del dominio | `GET /api/hostiles/{id}/comportamiento` usa la referencia `Descriptible`. El mensaje `comportamiento()` también se puede enviar a un `Aldeano` mediante ese tipo. |
+| Ocultamiento | Constructores y métodos del dominio validan nombre, vida, rango y daño. JPA carga los campos privados mediante constructores protegidos sin argumentos. H2 también exige valores obligatorios y verifica que la vida y el rango sean no negativos. Compará los listados 04 y 09 de Insomnia para comprobar que el alta ilegal deja las filas intactas. |
+| PUT y PATCH | Elegí `PATCH` para actualizar `nombre`, `rangoAggro` o ambos. Un campo omitido o `null` conserva el valor anterior. Al menos uno debe tener valor. La vida se fija en el alta y la cambia el dominio durante la partida. |
+| DELETE | Elimina la fila de la partida y responde 204. La detonación llama al dominio para cambiar la vida y permite seguir leyendo al Creeper con vida cero hasta borrarlo. |
+| Dos reglas | `POST /api/hostiles/{id}/explosiones` representa la detonación de un Creeper contra un Zombie. Un `GET` posterior de los hostiles muestra las dos vidas guardadas. |
+| Excepciones | `ReglaMinecraftException` cubre invariantes generales. `FueraDeAlcanceException` identifica la distancia excesiva y `CreeperAgotadoException` identifica la falta de vida del Creeper. Cada tipo tiene su `@ExceptionHandler`. Son no comprobadas para dejar que interrumpan la operación y provoquen el rollback de Spring. Un ID inexistente es un error de búsqueda 404. El cuerpo incluye `codigo` y `mensaje`. |
 
-```java
-public Zombie(String nombre) {
-    this(nombre, 20, 10);
-}
+Si se cambia H2 por otra base relacional, los primeros ajustes van en el driver de `pom.xml` y en las propiedades de conexión y esquema. El repositorio conserva su contrato y el método de explosión conserva las reglas del juego.
 
-public Zombie(String nombre, int vida, int rangoAggro) {
-    super(nombre, vida, rangoAggro);
-}
-```
+## Prueba con Insomnia
 
-El constructor simple delega al constructor completo mediante `this(...)`. El constructor completo utiliza `super(...)` para inicializar los datos heredados de `Hostil` y `Entidad`.
+Importá [la colección POO-08 · Minecraft](insomnia/POO-08-Minecraft.json) desde **Import → File**. En el entorno base, `base_url` apunta a `http://localhost:8080`. [Referencia de importación de Insomnia](https://developer.konghq.com/insomnia/import-export/).
 
-### Aldeano
+1. Ejecutá 01–03. Copiá el `id` de cada alta en `creeper_id` y `zombie_id`, respectivamente. Usá los IDs nuevos cada vez que repitas el recorrido.
+2. Ejecutá 04–07 para listar, consultar y renombrar al Zombie. Verificá que la segunda lectura conserve el nombre nuevo.
+3. Ejecutá 08–11. Compará los IDs de 04 y 09, comprobá el 404 del ID 0 y leé el comportamiento del Zombie.
+4. Ejecutá 12–15 en ese orden. Primero esperá 422 con `FUERA_DE_ALCANCE`. La explosión a distancia 1 causa 9 puntos de daño y deja las vidas en 0 y 11. Confirmalas con el listado 14 y, si querés ver las filas, con la consola H2. El segundo intento válido en distancia devuelve 409 con `CREEPER_AGOTADO`.
+5. Ejecutá 16–18 para borrar los datos de ejemplo y confirmar con 404 que el Zombie ya no existe.
 
-```java
-public Aldeano(String nombre) {
-    this(nombre, 20);
-}
-
-public Aldeano(String nombre, int vida) {
-    super(nombre, vida);
-}
-```
-
-También en `Aldeano`, el constructor simple utiliza `this(...)` y el constructor completo delega la inicialización común mediante `super(...)`.
-
-### Sobreescritura
-
-La **sobreescritura** ocurre cuando una clase hija redefine un método heredado utilizando la misma firma. El método concreto que se ejecuta se decide en tiempo de ejecución según el tipo real del objeto.
-
-La clase abstracta `Entidad` define:
-
-```java
-public abstract String moverse();
-public abstract String comportamiento();
-```
-
-Estos métodos son sobrescritos con `@Override` por las cuatro clases concretas:
-
-- `Zombie`
-- `Creeper`
-- `Aldeano`
-- `Jugador`
-
-Además:
-
-- `Hostil` define el método abstracto `atacar()`, sobrescrito por `Zombie` y `Creeper`.
-- `NoHostil` define el método abstracto `interactuar()`, sobrescrito por `Aldeano`.
-
-### Diferencia entre sobrecarga y sobreescritura
-
-| Concepto | Sobrecarga | Sobreescritura |
-|---|---|---|
-| Nombre | Igual | Igual |
-| Parámetros | Diferentes | Misma firma |
-| Resolución | Tiempo de compilación | Tiempo de ejecución |
-| Ejemplo | Constructores de `Zombie` y `Aldeano` | `moverse()`, `comportamiento()`, `atacar()`, `interactuar()` |
-
-## Herencia y polimorfismo
-
-El controller trabaja con el tipo padre `Entidad`.
-
-```java
-Entidad entidad = new Zombie(nombre, vida, rangoAggro);
-```
-
-```java
-Entidad entidad = new Aldeano(nombre, vida);
-```
-
-Ambos objetos se procesan mediante `respuesta(Entidad entidad)`, y el comportamiento concreto se resuelve mediante polimorfismo.
-
-## Ocultamiento e invariantes
-
-Los atributos del dominio son privados y no se exponen mediante setters públicos.
-
-- El nombre no puede ser nulo ni vacío.
-- La vida no puede ser negativa.
-- El daño debe ser positivo.
-- La vida nunca baja de cero.
-- El rango de agresión no puede ser negativo.
-- La experiencia del jugador no puede ser negativa.
-
-## API REST
-
-### GET /
-
-```text
-GET http://localhost:8080/
-```
-
-### Zombie completo
-
-```text
-GET http://localhost:8080/api/entidades/zombie?nombre=Zombie1&vida=20&rangoAggro=10
-```
-
-### Aldeano completo
-
-```text
-GET http://localhost:8080/api/entidades/aldeano?nombre=Aldeano1&vida=20
-```
-
-### Zombie con constructor simple
-
-```text
-GET http://localhost:8080/api/entidades/zombie/simple?nombre=ZombieSimple
-```
-
-### Aldeano con constructor simple
-
-```text
-GET http://localhost:8080/api/entidades/aldeano/simple?nombre=AldeanoSimple
-```
-
-Los endpoints devuelven JSON con tipo, nombre, vida, estado, movimiento y comportamiento.
-
-## Conceptos de POO aplicados
-
-- abstracción;
-- encapsulamiento;
-- herencia;
-- sobrescritura;
-- sobrecarga;
-- polimorfismo;
-- validación de invariantes.
-
-## Bitácora de IA
-
-El uso del asistente de IA se encuentra documentado en `BITACORA.md`, incluyendo el asistente, el modelo exacto y un resumen de los prompts.
+Las [especificaciones para la entrega](docs/POO-08-Minecraft.md) enumeran los cuerpos y códigos HTTP. La [bitácora](BITACORA.md) registra el uso de IA.

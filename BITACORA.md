@@ -31,3 +31,10 @@ Cambios revisados o incorporados:
 - actualización de documentación y forma de prueba.
 
 Se utilizó ChatGPT con el modelo GPT-5.6 Sol para revisar la entrega original, compararla con la rúbrica nueva y preparar la documentación actualizada.
+
+## POO-08 · CRUD, H2 y explosiones
+
+- **Asistente** OpenAI Codex.
+- **Modelo** `gpt-6.1-sol`.
+- **Resumen del prompt** Continuar el repositorio del taller y aplicar POO-08 al modelado existente. La consigna pidió un CRUD de la familia, H2, dos reglas para una simulación persistida, excepciones del dominio, una interfaz, una colección de Insomnia y la documentación para entregar.
+- **Asistencia** Codex revisó la consigna y la rúbrica, implementó y verificó el servicio sobre el modelo de Minecraft, y preparó la colección y la documentación.
