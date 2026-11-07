@@ -1,0 +1,335 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-11-07T00:00:00.000Z",
+  "__export_source": "ep-taller-git-2026",
+  "resources": [
+    {
+      "_id": "__WORKSPACE_ID__",
+      "parentId": null,
+      "name": "POO-08 · Minecraft",
+      "description": "CRUD de hostiles y simulación persistida de explosiones. Ejecutá los pedidos en orden.",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "__BASE_ENVIRONMENT_ID__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "creeper_id": 0,
+        "zombie_id": 0
+      },
+      "_type": "environment"
+    },
+    {
+      "_id": "__request_1__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "01 · Inicio",
+      "description": "Esperá HTTP 200.",
+      "url": "{{ _.base_url }}/",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 1,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_2__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "02 · Crear Creeper",
+      "description": "Esperá HTTP 201. Copiá el id a creeper_id en el entorno.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"tipo\": \"CREEPER\",\n  \"nombre\": \"Chispa\",\n  \"vida\": 20,\n  \"rangoAggro\": 3\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_3__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "03 · Crear Zombie",
+      "description": "Esperá HTTP 201. Copiá el id a zombie_id en el entorno.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"tipo\": \"ZOMBIE\",\n  \"nombre\": \"Caminante\",\n  \"vida\": 20,\n  \"rangoAggro\": 10\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 3,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_4__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "04 · Listar hostiles",
+      "description": "Esperá HTTP 200.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 4,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_5__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "05 · Leer Zombie",
+      "description": "Esperá HTTP 200.",
+      "url": "{{ _.base_url }}/api/hostiles/{{ _.zombie_id }}",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 5,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_6__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "06 · Renombrar Zombie",
+      "description": "Esperá HTTP 200.",
+      "url": "{{ _.base_url }}/api/hostiles/{{ _.zombie_id }}",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Caminante nocturno\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 6,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_7__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "07 · Confirmar actualización",
+      "description": "Esperá HTTP 200.",
+      "url": "{{ _.base_url }}/api/hostiles/{{ _.zombie_id }}",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 7,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_8__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "08 · POST ilegal · vida negativa",
+      "description": "Esperá HTTP 400. Esperá REGLA_MINECRAFT.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"tipo\": \"ZOMBIE\",\n  \"nombre\": \"Inválido\",\n  \"vida\": -1,\n  \"rangoAggro\": 10\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 8,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_9__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "09 · Listar tras el POST ilegal",
+      "description": "Esperá HTTP 200. Compará los IDs con el pedido 04. Deben coincidir.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 9,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_10__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "10 · ID inexistente",
+      "description": "Esperá HTTP 404. Esperá HOSTIL_NO_ENCONTRADO.",
+      "url": "{{ _.base_url }}/api/hostiles/0",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 10,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_11__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "11 · Leer comportamiento por la interfaz",
+      "description": "Esperá HTTP 200.",
+      "url": "{{ _.base_url }}/api/hostiles/{{ _.zombie_id }}/comportamiento",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 11,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_12__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "12 · Explosión fuera de alcance",
+      "description": "Esperá HTTP 422. Esperá FUERA_DE_ALCANCE. Los dos conservan 20 de vida.",
+      "url": "{{ _.base_url }}/api/hostiles/{{ _.creeper_id }}/explosiones",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"zombieId\": {{ _.zombie_id }},\n  \"distancia\": 4\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 12,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_13__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "13 · Simular explosión",
+      "description": "Esperá HTTP 200. Esperá 9 de daño, Creeper con 0 y Zombie con 11 de vida.",
+      "url": "{{ _.base_url }}/api/hostiles/{{ _.creeper_id }}/explosiones",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"zombieId\": {{ _.zombie_id }},\n  \"distancia\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 13,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_14__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "14 · Confirmar los estados persistidos",
+      "description": "Esperá HTTP 200. Buscá los dos IDs del entorno y comprobá las vidas 0 y 11.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 14,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_15__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "15 · Creeper agotado",
+      "description": "Esperá HTTP 409. Esperá CREEPER_AGOTADO.",
+      "url": "{{ _.base_url }}/api/hostiles/{{ _.creeper_id }}/explosiones",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"zombieId\": {{ _.zombie_id }},\n  \"distancia\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 15,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_16__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "16 · Borrar Zombie",
+      "description": "Esperá HTTP 204.",
+      "url": "{{ _.base_url }}/api/hostiles/{{ _.zombie_id }}",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 16,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_17__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "17 · Confirmar borrado",
+      "description": "Esperá HTTP 404.",
+      "url": "{{ _.base_url }}/api/hostiles/{{ _.zombie_id }}",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 17,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_18__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "18 · Borrar Creeper",
+      "description": "Esperá HTTP 204.",
+      "url": "{{ _.base_url }}/api/hostiles/{{ _.creeper_id }}",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 18,
+      "_type": "request"
+    }
+  ]
+}
