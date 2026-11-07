@@ -4,6 +4,8 @@ Elías Pont · Lenguaje de Programación 3 · Minecraft
 
 API REST para guardar hostiles y simular una explosión entre un Creeper y un Zombie. El proyecto usa Java 21, Spring Boot, Spring Data JPA y H2. La licencia del proyecto es [Apache 2.0](LICENSE).
 
+[Commit de la solución](https://github.com/eliasleonardo11-dotcom/EP-taller-git-2026/commit/ad8d65d13bdc430a3f65c22a3e3cff49d5d37801)
+
 ## Arranque
 
 Desde la raíz del repositorio, con JDK 21 disponible:
