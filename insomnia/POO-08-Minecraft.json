@@ -1,7 +1,7 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2026-11-07T00:00:00.000Z",
+  "__export_date": "2026-11-07T00:00:00Z",
   "__export_source": "ep-taller-git-2026",
   "resources": [
     {
@@ -41,7 +41,7 @@
       "_id": "__request_2__",
       "parentId": "__WORKSPACE_ID__",
       "name": "02 · Crear Creeper",
-      "description": "Esperá HTTP 201. Copiá el id a creeper_id en el entorno.",
+      "description": "Esperá HTTP 201. El ID se guarda en creeper_id después de un alta exitosa.",
       "url": "{{ _.base_url }}/api/hostiles",
       "method": "POST",
       "body": {
@@ -57,13 +57,14 @@
       ],
       "authentication": {},
       "metaSortKey": 2,
-      "_type": "request"
+      "_type": "request",
+      "afterResponseScript": "if (insomnia.response.code === 201) {\n  insomnia.environment.set('creeper_id', insomnia.response.json().id);\n}"
     },
     {
       "_id": "__request_3__",
       "parentId": "__WORKSPACE_ID__",
       "name": "03 · Crear Zombie",
-      "description": "Esperá HTTP 201. Copiá el id a zombie_id en el entorno.",
+      "description": "Esperá HTTP 201. El ID se guarda en zombie_id después de un alta exitosa.",
       "url": "{{ _.base_url }}/api/hostiles",
       "method": "POST",
       "body": {
@@ -79,7 +80,8 @@
       ],
       "authentication": {},
       "metaSortKey": 3,
-      "_type": "request"
+      "_type": "request",
+      "afterResponseScript": "if (insomnia.response.code === 201) {\n  insomnia.environment.set('zombie_id', insomnia.response.json().id);\n}"
     },
     {
       "_id": "__request_4__",
@@ -329,6 +331,28 @@
       "headers": [],
       "authentication": {},
       "metaSortKey": 18,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_19__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "19 · Subtipo desconocido",
+      "description": "Esperá HTTP 400. El código debe ser PEDIDO_INVALIDO.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"tipo\": \"ESQUELETO\",\n  \"nombre\": \"Inválido\",\n  \"vida\": 20,\n  \"rangoAggro\": 10\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 19,
       "_type": "request"
     }
   ]
