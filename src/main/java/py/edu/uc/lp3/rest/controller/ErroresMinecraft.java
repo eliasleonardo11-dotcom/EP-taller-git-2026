@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
-import py.edu.uc.lp3.domain.minecraft.CreeperAgotadoException;
-import py.edu.uc.lp3.domain.minecraft.FueraDeAlcanceException;
-import py.edu.uc.lp3.domain.minecraft.ReglaMinecraftException;
+import py.edu.uc.lp3.service.exception.CreeperAgotadoException;
+import py.edu.uc.lp3.service.exception.FueraDeAlcanceException;
+import py.edu.uc.lp3.service.exception.ReglaMinecraftException;
 
 @RestControllerAdvice(assignableTypes = {HostilController.class, EntidadController.class})
 public class ErroresMinecraft {

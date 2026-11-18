@@ -1,4 +1,4 @@
-package py.edu.uc.lp3.domain.minecraft;
+package py.edu.uc.lp3.service.exception;
 
 public class FueraDeAlcanceException extends ReglaMinecraftException {
     public FueraDeAlcanceException(int distancia, int alcance) {

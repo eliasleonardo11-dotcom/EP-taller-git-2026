@@ -13,13 +13,17 @@ import py.edu.uc.lp3.domain.minecraft.Zombie;
 @RestController
 public class EntidadController {
 
+    private final py.edu.uc.lp3.service.EntidadService servicio;
+
+    public EntidadController(py.edu.uc.lp3.service.EntidadService servicio) { this.servicio = servicio; }
+
     @GetMapping("/api/entidades/zombie")
     public Map<String, Object> crearZombie(
             @RequestParam String nombre,
             @RequestParam int vida,
             @RequestParam(defaultValue = "10") int rangoAggro) {
 
-        Entidad entidad = new Zombie(nombre, vida, rangoAggro);
+        Entidad entidad = servicio.zombie(nombre, vida, rangoAggro);
 
         return respuesta(entidad);
     }
@@ -29,7 +33,7 @@ public class EntidadController {
             @RequestParam String nombre,
             @RequestParam int vida) {
 
-        Entidad entidad = new Aldeano(nombre, vida);
+        Entidad entidad = servicio.aldeano(nombre, vida);
 
         return respuesta(entidad);
     }
@@ -39,7 +43,7 @@ public class EntidadController {
     public Map<String, Object> crearZombieSimple(
             @RequestParam String nombre) {
 
-        Entidad entidad = new Zombie(nombre);
+        Entidad entidad = servicio.zombie(nombre, 20, 10);
         return respuesta(entidad);
     }
 
@@ -47,7 +51,7 @@ public class EntidadController {
     public Map<String, Object> crearAldeanoSimple(
             @RequestParam String nombre) {
 
-        Entidad entidad = new Aldeano(nombre);
+        Entidad entidad = servicio.aldeano(nombre, 20);
         return respuesta(entidad);
     }
 

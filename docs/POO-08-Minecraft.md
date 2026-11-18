@@ -3,7 +3,7 @@
 - **Alumno** Elías Pont
 - **Asignatura** Lenguaje de Programación 3
 
-[Commit de la solución](https://github.com/eliasleonardo11-dotcom/EP-taller-git-2026/commit/1803a8eb06c81741776e6c4c6fe37752b895fe08)
+[Commit original de POO-08 (antes de la corrección)](https://github.com/eliasleonardo11-dotcom/EP-taller-git-2026/commit/1803a8eb06c81741776e6c4c6fe37752b895fe08)
 
 ## Objetivo
 
@@ -26,9 +26,9 @@ La aplicación se ejecuta en `http://localhost:8080`.
 
 ## Invariantes y reglas
 
-- El nombre tiene entre 1 y 100 caracteres y contiene algún carácter distinto de espacio en blanco. La vida y el rango son enteros no negativos. `PATCH` modifica solo la configuración y requiere al menos un campo con valor.
+- El nombre tiene entre 1 y 100 caracteres y contiene algún carácter distinto de espacio en blanco. El servicio exige vida entera entre 1 y 20 al crear y actualizar; el rango es un entero no negativo. La simulación puede dejar vida 0. PATCH no admite modificar la vida y rechaza cambios de configuración sobre hostiles muertos. `PATCH` modifica solo la configuración y requiere al menos un campo con valor.
 - El Creeper y el Zombie deben tener vida. El alcance de la explosión es el rango del Creeper. La distancia es un entero no negativo y el límite del alcance se incluye.
-- La potencia dentro del alcance es `max(1, 12 - 3 × distancia)`. El daño aplicado se limita a la vida restante del Zombie y el Creeper queda con vida cero. Si falla la operación, H2 revierte todos los cambios de la explosión.
+- La potencia dentro del alcance es `max(1, 12 - 3 × distancia)`. El daño aplicado se limita a la vida restante del Zombie y el Creeper queda con vida cero. Si falla la operación, la transacción de HostilService revierte todos los cambios de la explosión.
 
 ## Respuestas de error
 
@@ -61,3 +61,7 @@ Desde la raíz del proyecto, ejecutá la prueba que coordina dos transacciones d
 ```
 
 En PowerShell, usá `.\mvnw.cmd` en lugar de `./mvnw`. La prueba cambia el nombre del Zombie mientras la explosión intenta guardar su estado. Verifica que la API devuelva HTTP 409 con `CAMBIO_CONCURRENTE`, que ambos hostiles sigan con 20 de vida y que el cambio de nombre confirmado se conserve.
+
+## Corrección posterior
+
+Las observaciones de arquitectura, vida y bitácora se detallan en el README. Ejecutá `./mvnw test` para verificar los casos originales y las altas con vida imposible. Las reglas, validaciones y excepciones están en la capa service; el controlador delega y las entidades conservan el estado.

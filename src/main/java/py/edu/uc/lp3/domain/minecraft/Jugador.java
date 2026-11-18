@@ -7,9 +7,6 @@ public class Jugador extends Entidad {
     public Jugador(String nombre, int vida, int experiencia) {
         super(nombre, vida);
 
-        if (experiencia < 0) {
-            throw new IllegalArgumentException("La experiencia no puede ser negativa");
-        }
 
         this.experiencia = experiencia;
     }

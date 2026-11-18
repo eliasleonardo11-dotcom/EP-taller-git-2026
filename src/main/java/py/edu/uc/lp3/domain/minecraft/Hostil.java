@@ -16,7 +16,7 @@ import org.hibernate.annotations.Check;
 @Table(name = "hostiles")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo")
-@Check(constraints = "vida >= 0 and rango_aggro >= 0 and char_length(trim(nombre)) > 0")
+@Check(constraints = "vida >= 0 and vida <= 20 and rango_aggro >= 0 and char_length(trim(nombre)) > 0")
 public abstract class Hostil extends Entidad implements Descriptible {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,21 +33,14 @@ public abstract class Hostil extends Entidad implements Descriptible {
 
     public Hostil(String nombre, int vida, int rangoAggro) {
         super(nombre, vida);
-        validarRango(rangoAggro);
         this.rangoAggro = rangoAggro;
     }
 
     public void configurar(String nombre, int rangoAggro) {
-        validarRango(rangoAggro);
         renombrar(nombre);
         this.rangoAggro = rangoAggro;
     }
 
-    private static void validarRango(int rangoAggro) {
-        if (rangoAggro < 0) {
-            throw new ReglaMinecraftException("El rango de agresión no puede ser negativo");
-        }
-    }
 
     public Long getId() {
         return id;

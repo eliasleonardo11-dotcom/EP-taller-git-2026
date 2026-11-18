@@ -148,10 +148,10 @@ class EpTallerGit2026ApplicationTests {
 
         Creeper detonador = new Creeper("Chispa", 1, Integer.MAX_VALUE);
         Zombie objetivo = new Zombie("Caminante", 2, 0);
-        assertThat(detonador.explotarContra(objetivo, Integer.MAX_VALUE)).isEqualTo(1);
+        assertThat(py.edu.uc.lp3.service.HostilService.aplicarExplosion(detonador, objetivo, Integer.MAX_VALUE)).isEqualTo(1);
         assertThat(detonador.getVida()).isZero();
         assertThat(objetivo.getVida()).isEqualTo(1);
-        assertThat(new Creeper("Chispa", 1, 0).explotarContra(objetivo, 0)).isEqualTo(1);
+        assertThat(py.edu.uc.lp3.service.HostilService.aplicarExplosion(new Creeper("Chispa", 1, 0), objetivo, 0)).isEqualTo(1);
         assertThat(objetivo.getVida()).isZero();
     }
 
@@ -185,6 +185,43 @@ class EpTallerGit2026ApplicationTests {
         mvc.perform(get(HOSTILES + "/{id}", zombie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre").value("Nombre concurrente"));
+    }
+
+    @Test
+    void rechazaAltasConVidaImposibleSinCambiarH2() throws Exception {
+        for (String tipo : new String[]{"CREEPER", "ZOMBIE"}) {
+            for (int vida : new int[]{0, -1, 21, 5000}) {
+                mvc.perform(post(HOSTILES).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"tipo\":\"%s\",\"nombre\":\"Inválido\",\"vida\":%d,\"rangoAggro\":3}".formatted(tipo, vida)))
+                        .andExpect(status().isBadRequest());
+                assertThat(hostiles.count()).isZero();
+            }
+        }
+    }
+
+    @Test
+    void validaLimitesDeVidaYRechazaActualizarMuertos() throws Exception {
+        for (String tipo : new String[]{"CREEPER", "ZOMBIE"}) {
+            mvc.perform(post(HOSTILES).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"tipo\":\"%s\",\"nombre\":\"Herido\",\"vida\":1,\"rangoAggro\":3}".formatted(tipo)))
+                    .andExpect(status().isCreated());
+        }
+        long creeper = crear("CREEPER", "Chispa", 3);
+        long zombie = crear("ZOMBIE", "Caminante", 10);
+        assertThatThrownBy(() -> jdbc.update("UPDATE hostiles SET vida = 21 WHERE id = ?", zombie))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        mvc.perform(patch(HOSTILES + "/{id}", zombie).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"vida\":5000}"))
+                .andExpect(status().isBadRequest());
+        explotar(creeper, zombie, 1).andExpect(status().isOk());
+        mvc.perform(patch(HOSTILES + "/{id}", creeper).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"nombre\":\"No permitido\"}"))
+                .andExpect(status().isBadRequest());
+        assertThat(hostiles.findById(creeper).orElseThrow().getNombre()).isEqualTo("Chispa");
+        assertThat(vidaEnH2(creeper)).isZero();
+        assertThat(vidaEnH2(zombie)).isEqualTo(11);
+        mvc.perform(get("/api/entidades/zombie").param("nombre", "Inválido").param("vida", "5000"))
+                .andExpect(status().isBadRequest());
     }
 
     private void esperarEscrituraBloqueada() throws InterruptedException {

@@ -16,16 +16,10 @@ public abstract class Entidad {
 
     public Entidad(String nombre, int vida) {
         renombrar(nombre);
-        if (vida < 0) {
-            throw new ReglaMinecraftException("La vida no puede ser negativa");
-        }
         this.vida = vida;
     }
 
     protected final void renombrar(String nombre) {
-        if (nombre == null || nombre.isBlank() || nombre.length() > 100) {
-            throw new ReglaMinecraftException("El nombre debe tener entre 1 y 100 caracteres y no estar en blanco");
-        }
         this.nombre = nombre;
     }
 
@@ -41,11 +35,8 @@ public abstract class Entidad {
         return vida > 0;
     }
 
-    public void recibirDanio(int cantidad) {
-        if (cantidad <= 0) {
-            throw new ReglaMinecraftException("El daño debe ser positivo");
-        }
-        vida = Math.max(0, vida - cantidad);
+    public void actualizarVida(int vida) {
+        this.vida = vida;
     }
 
     public String desaparecer() {

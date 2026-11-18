@@ -1,7 +1,7 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2026-11-07T00:00:00Z",
+  "__export_date": "2026-11-18T13:00:00Z",
   "__export_source": "ep-taller-git-2026",
   "resources": [
     {
@@ -353,6 +353,94 @@
       ],
       "authentication": {},
       "metaSortKey": 19,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_20__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "20 · Rechazar ZOMBIE con vida 5000",
+      "description": "Esperá HTTP 400 REGLA_MINECRAFT. Compará el listado antes y después: no debe cambiar.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"tipo\": \"ZOMBIE\", \"nombre\": \"Inválido\", \"vida\": 5000, \"rangoAggro\": 3}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 20,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_21__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "21 · Rechazar CREEPER con vida 0",
+      "description": "Esperá HTTP 400 REGLA_MINECRAFT. Compará el listado antes y después: no debe cambiar.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"tipo\": \"CREEPER\", \"nombre\": \"Inválido\", \"vida\": 0, \"rangoAggro\": 3}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 21,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_22__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "22 · Rechazar ZOMBIE con vida 0",
+      "description": "Esperá HTTP 400 REGLA_MINECRAFT. Compará el listado antes y después: no debe cambiar.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"tipo\": \"ZOMBIE\", \"nombre\": \"Inválido\", \"vida\": 0, \"rangoAggro\": 3}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 22,
+      "_type": "request"
+    },
+    {
+      "_id": "__request_23__",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "23 · Rechazar CREEPER con vida 21",
+      "description": "Esperá HTTP 400 REGLA_MINECRAFT. Compará el listado antes y después: no debe cambiar.",
+      "url": "{{ _.base_url }}/api/hostiles",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"tipo\": \"CREEPER\", \"nombre\": \"Inválido\", \"vida\": 21, \"rangoAggro\": 3}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 23,
       "_type": "request"
     }
   ]
